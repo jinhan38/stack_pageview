@@ -18,12 +18,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   List<ScrollController> scrollControllers = [];
 
+  StackPageViewInterface? interface;
+
   @override
   void initState() {
     _tabController = TabController(
         length: _tabLabels.length,
         vsync: this,
-        animationDuration: Duration(milliseconds: 200));
+        animationDuration: const Duration(milliseconds: 200));
     for (var o in _tabLabels) {
       scrollControllers.add(ScrollController());
     }
@@ -39,8 +41,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  StackPageViewInterface? interface;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,41 +53,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               tabBar: _tabBar(),
               tabController: _tabController,
               scrollControllers: scrollControllers,
-              interface: (interface) {
-                this.interface = interface;
-              },
-              tabBarViews: [
-                PageItem(
-                  text: "탭 A",
-                  scrollController: scrollControllers[0],
-                ),
-                PageItem(
-                  text: "탭 B",
-                  scrollController: scrollControllers[1],
-                ),
-                PageItem(
-                  text: "탭 C",
-                  scrollController: scrollControllers[2],
-                ),
-              ],
+              interface: (interface) => this.interface = interface,
+              tabBarViews: _tabBarView(),
             ),
           ),
-          Row(
-            children: [
-              ElevatedButton(
-                  onPressed: () {
-                    if (interface == null) return;
-                    interface!.goTop();
-                  },
-                  child: const Text("Go top")),
-              ElevatedButton(
-                  onPressed: () {
-                    if (interface == null) return;
-                    interface!.goBottom();
-                  },
-                  child: const Text("Go bottom")),
-            ],
-          ),
+          _button(),
         ],
       ),
     );
@@ -114,8 +84,42 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       unselectedLabelColor: Colors.grey,
       tabs: List.generate(_tabLabels.length, (index) {
         return SizedBox(
-            height: 45, child: Center(child: Text(_tabLabels[index])));
+          height: 45,
+          child: Center(child: Text(_tabLabels[index])),
+        );
       }),
+    );
+  }
+
+  List<Widget> _tabBarView() {
+    return [
+      PageItem(
+        text: "탭 A",
+        scrollController: scrollControllers[0],
+      ),
+      PageItem(
+        text: "탭 B",
+        scrollController: scrollControllers[1],
+      ),
+      PageItem(
+        text: "탭 C",
+        scrollController: scrollControllers[2],
+      ),
+    ];
+  }
+
+  Widget _button() {
+    return Row(
+      children: [
+        ElevatedButton(
+          onPressed: () => interface?.goTop(),
+          child: const Text("Go top"),
+        ),
+        ElevatedButton(
+          onPressed: () => interface?.goBottom(),
+          child: const Text("Go bottom"),
+        ),
+      ],
     );
   }
 }
