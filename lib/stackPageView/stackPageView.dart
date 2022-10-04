@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'customScrollPhysics.dart';
+import 'stackScrollPhysics.dart';
 import 'stackNotification.dart';
 import 'stackPageViewInterface.dart';
 
@@ -20,6 +20,7 @@ class StackPageView extends StatefulWidget {
     this.animationDuration = const Duration(milliseconds: 100),
     this.interface,
     this.controller,
+    this.tabDrag = true,
     Key? key,
   }) : super(key: key);
   Widget header;
@@ -33,6 +34,7 @@ class StackPageView extends StatefulWidget {
   Duration animationDuration;
   Function(StackPageViewInterface? interface)? interface;
   Function(ScrollController controller)? controller;
+  bool tabDrag;
 
   @override
   _StackPageViewState createState() => _StackPageViewState();
@@ -67,12 +69,18 @@ class _StackPageViewState extends State<StackPageView>
 
   Function(ScrollController controller)? get controller => widget.controller;
 
+  bool get tabDrag => widget.tabDrag;
+
+  double _touchY = 0;
+
+  _initTouchY() => _touchY = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: StackListenerWidget(
-          header: header,
+          header: _dragDetector(header),
           headerHeight: headerHeight,
           interface: setInterface,
           scrollDirection: scrollDirection,
@@ -83,7 +91,7 @@ class _StackPageViewState extends State<StackPageView>
             length: tabBarViews.length,
             child: Column(
               children: [
-                tabBar,
+                _dragDetector(tabBar),
                 _tabBarView(),
               ],
             ),
@@ -96,7 +104,7 @@ class _StackPageViewState extends State<StackPageView>
   Widget _tabBarView() {
     return Expanded(
       child: TabBarView(
-        physics: const CustomScrollPhysics(),
+        physics: const StackScrollPhysics(),
         controller: tabController,
         children: List.generate(tabBarViews.length, (index) {
           return StackNotification(
@@ -132,5 +140,36 @@ class _StackPageViewState extends State<StackPageView>
     stackPageViewInterface = i;
     if (interface == null) return;
     interface!(stackPageViewInterface);
+  }
+
+  /// 헤더와 탭바 드래그 했을 때 애니메이션 가능하도록 설정
+  Widget _dragDetector(Widget child) {
+    if (!tabDrag) return child;
+    return GestureDetector(
+      child: child,
+      onVerticalDragStart: (details) => _initTouchY(),
+      onVerticalDragCancel: () => _initTouchY(),
+      onVerticalDragDown: (details) => _initTouchY(),
+      onVerticalDragUpdate: (details) {
+        try {
+          if (details.delta.dy > 0) {
+            _touchY += details.delta.dy;
+          } else {
+            _touchY += details.delta.dy;
+          }
+          if (_touchY > dragY) {
+            stackPageViewInterface?.atTopAnimation();
+            return;
+          } else if (_touchY < -dragY) {
+            stackPageViewInterface?.atBottomAnimation();
+            return;
+          }
+        } on Exception catch (e) {
+          if (kDebugMode) {
+            print('_dragDetector e : $e');
+          }
+        }
+      },
+    );
   }
 }

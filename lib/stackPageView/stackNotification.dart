@@ -110,8 +110,6 @@ class _StackNotificationState extends State<StackNotification>
     );
   }
 
-  /// 화면에서 스크롤이 없을 정도로 y 값이 작을 경우
-  /// 드래그로 체크해서 atTop, atBottom 호출
   Widget _dragDetector(
     Widget child,
     Function atTop,
