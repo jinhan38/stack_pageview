@@ -51,6 +51,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               header: _header(),
               headerHeight: 150,
               tabBar: _tabBar(),
+              timerPeriodic: 1,
               tabController: _tabController,
               scrollControllers: scrollControllers,
               interface: (interface) => this.interface = interface,

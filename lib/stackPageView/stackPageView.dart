@@ -35,6 +35,8 @@ class StackPageView extends StatefulWidget {
   Function(StackPageViewInterface? interface)? interface;
   Function(ScrollController controller)? controller;
   bool tabDrag;
+  Function(double offset)? scrollUp;
+  Function(double offset)? scrollDown;
 
   @override
   _StackPageViewState createState() => _StackPageViewState();
@@ -69,6 +71,10 @@ class _StackPageViewState extends State<StackPageView>
 
   Function(ScrollController controller)? get controller => widget.controller;
 
+  Function(double offset)? get scrollUp => widget.scrollUp;
+
+  Function(double offset)? get scrollDown => widget.scrollDown;
+
   bool get tabDrag => widget.tabDrag;
 
   double _touchY = 0;
@@ -86,6 +92,8 @@ class _StackPageViewState extends State<StackPageView>
           scrollDirection: scrollDirection,
           timerPeriodic: timerPeriodic,
           scrollController: scrollControllers[tabController.index],
+          scrollUp: (offset) {},
+          scrollDown: (offset) {},
           defaultTabController: DefaultTabController(
             animationDuration: animationDuration,
             length: tabBarViews.length,
