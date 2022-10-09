@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'stackPageViewInterface.dart';
 
 class StackListenerWidget extends StatefulWidget {
+
   StackListenerWidget({
     required this.header,
     required this.headerHeight,
@@ -15,6 +16,8 @@ class StackListenerWidget extends StatefulWidget {
     required this.defaultTabController,
     required this.timerPeriodic,
     required this.scrollController,
+    this.scrollUp,
+    this.scrollDown,
     Key? key,
   }) : super(key: key);
   final Widget header;
@@ -24,6 +27,8 @@ class StackListenerWidget extends StatefulWidget {
   final DefaultTabController defaultTabController;
   final int timerPeriodic;
   final ScrollController scrollController;
+  Function(double offset)? scrollUp;
+  Function(double offset)? scrollDown;
 
   @override
   _StackListenerWidgetState createState() => _StackListenerWidgetState();
@@ -44,6 +49,10 @@ class _StackListenerWidgetState extends State<StackListenerWidget>
   int get timerPeriodic => widget.timerPeriodic;
 
   ScrollController get scrollController => widget.scrollController;
+
+  Function(double offset)? get scrollUp => widget.scrollUp;
+
+  Function(double offset)? get scrollDown => widget.scrollDown;
 
   final ValueNotifier<double> _headerTop = ValueNotifier<double>(0);
   bool headerAnimating = false;
@@ -93,15 +102,22 @@ class _StackListenerWidgetState extends State<StackListenerWidget>
     try {
       if (headerAnimating) return;
       if (scrollDirection == null) return;
-      if (_headerTop.value.abs() == 0 &&
-          scrollDirection == ScrollDirection.reverse) {
-        atBottomAnimation();
-        return;
-      }
-      if (_headerTop.value.abs() == headerHeight &&
-          scrollDirection == ScrollDirection.forward) {
-        atTopAnimation();
-        return;
+
+      switch (scrollDirection) {
+        case ScrollDirection.reverse:
+          if (_headerTop.value.abs() == 0) atBottomAnimation();
+          if (scrollDown != null) scrollDown!(offset);
+
+          break;
+        case ScrollDirection.forward:
+          if (_headerTop.value.abs() == headerHeight) atTopAnimation();
+          if (scrollUp != null) scrollUp!(offset);
+
+          break;
+        case ScrollDirection.idle:
+          break;
+        default:
+          break;
       }
     } on Exception catch (e) {
       if (kDebugMode) {
@@ -161,6 +177,7 @@ class _StackListenerWidgetState extends State<StackListenerWidget>
   @override
   void goTop() {
     try {
+      print('scrollController : $scrollController');
       scrollController.jumpTo(0);
       atTopAnimation();
     } on Exception catch (e) {

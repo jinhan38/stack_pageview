@@ -55,6 +55,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               scrollControllers: scrollControllers,
               interface: (interface) => this.interface = interface,
               tabBarViews: _tabBarView(),
+              dragY: 10,
+              controller: (controller) {},
+              tabBarBackground: _tabDivider(),
+              tabBarBackgroundColor: Colors.white,
             ),
           ),
           _button(),
@@ -112,7 +116,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     return Row(
       children: [
         ElevatedButton(
-          onPressed: () => interface?.goTop(),
+          onPressed: () {
+            print('interface : $interface');
+            interface?.goTop();
+          },
           child: const Text("Go top"),
         ),
         ElevatedButton(
@@ -120,6 +127,20 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           child: const Text("Go bottom"),
         ),
       ],
+    );
+  }
+
+  /// 탭바 하단에 있는 divider widget
+  Widget _tabDivider() {
+    return const Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: Divider(
+        height: 2,
+        thickness: 2,
+        color: Colors.grey,
+      ),
     );
   }
 }

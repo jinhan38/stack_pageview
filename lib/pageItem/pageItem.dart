@@ -41,7 +41,7 @@ class _PageItemState extends State<PageItem> {
 
   addData() async {
     if (!mounted) return;
-    await Future.delayed(Duration(milliseconds: 300));
+    await Future.delayed(const Duration(milliseconds: 300));
     setState(() {
       itemCount += 20;
     });

@@ -21,6 +21,11 @@ class StackPageView extends StatefulWidget {
     this.interface,
     this.controller,
     this.tabDrag = true,
+    this.tabBarBackgroundColor = Colors.white,
+    this.tabBarHeight = 50,
+    this.tabBarBackground,
+    this.scrollUp,
+    this.scrollDown,
     Key? key,
   }) : super(key: key);
   Widget header;
@@ -35,6 +40,11 @@ class StackPageView extends StatefulWidget {
   Function(StackPageViewInterface? interface)? interface;
   Function(ScrollController controller)? controller;
   bool tabDrag;
+  Function(double offset)? scrollUp;
+  Function(double offset)? scrollDown;
+  Color? tabBarBackgroundColor;
+  double tabBarHeight;
+  Widget? tabBarBackground;
 
   @override
   _StackPageViewState createState() => _StackPageViewState();
@@ -69,33 +79,69 @@ class _StackPageViewState extends State<StackPageView>
 
   Function(ScrollController controller)? get controller => widget.controller;
 
+  Function(double offset)? get scrollUp => widget.scrollUp;
+
+  Function(double offset)? get scrollDown => widget.scrollDown;
+
   bool get tabDrag => widget.tabDrag;
+
+  Color? get tabBarBackgroundColor => widget.tabBarBackgroundColor;
+
+  double? get tabBarHeight => widget.tabBarHeight;
+
+  Widget? get tabBarBackground => widget.tabBarBackground;
 
   double _touchY = 0;
 
   _initTouchY() => _touchY = 0;
 
   @override
+  void initState() {
+    try {
+      tabController.addListener(() {
+        if (!tabController.indexIsChanging) {
+          setState(() {});
+        }
+      });
+    } on Exception catch (e) {
+      if (kDebugMode) {
+        print('tabController.addListener e : $e');
+      }
+    }
+
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: StackListenerWidget(
-          header: _dragDetector(header),
-          headerHeight: headerHeight,
-          interface: setInterface,
-          scrollDirection: scrollDirection,
-          timerPeriodic: timerPeriodic,
-          scrollController: scrollControllers[tabController.index],
-          defaultTabController: DefaultTabController(
-            animationDuration: animationDuration,
-            length: tabBarViews.length,
-            child: Column(
-              children: [
-                _dragDetector(tabBar),
-                _tabBarView(),
-              ],
+    return StackListenerWidget(
+      header: _dragDetector(header),
+      headerHeight: headerHeight,
+      interface: setInterface,
+      scrollDirection: scrollDirection,
+      timerPeriodic: timerPeriodic,
+      scrollController: scrollControllers[tabController.index],
+      scrollUp: scrollUp,
+      scrollDown: scrollDown,
+      defaultTabController: DefaultTabController(
+        animationDuration: animationDuration,
+        length: tabBarViews.length,
+        child: Column(
+          children: [
+            Container(
+              color: tabBarBackgroundColor,
+              height: widget.tabBarHeight,
+              child: _dragDetector(
+                Stack(
+                  children: [
+                    if (tabBarBackground != null) tabBarBackground!,
+                    Positioned.fill(child: tabBar),
+                  ],
+                ),
+              ),
             ),
-          ),
+            _tabBarView(),
+          ],
         ),
       ),
     );
